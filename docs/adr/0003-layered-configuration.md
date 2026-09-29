@@ -15,12 +15,16 @@ We split the code into layers with different lifecycles and different operators.
 
 | Layer | Applied by | Contents | Frequency |
 |---|---|---|---|
-| `foundation/` | A human with elevated credentials | Project (optional creation), APIs, state bucket, Workload Identity Federation, service accounts, VPC, subnet, firewall, static IPs, Artifact Registry repository, budget | Once per environment |
+| `foundation/` | A human with elevated credentials | APIs, state bucket, Workload Identity Federation, service accounts, VPC, subnet, firewall, static IPs, Artifact Registry repository, budget | Once per environment |
 | `stacks/gcs` | CI | Site bucket, backend bucket, CDN, load balancer, certificate | On every change |
 | `stacks/mig` | CI | Instance template, MIG, health check, backend service, load balancer, certificate | On every change |
 
 Reusable building blocks live in `modules/` (`https-lb`, `site-gcs`, `site-mig`) and are composed by the stacks.
-Stacks read foundation values through input variables populated from foundation outputs.
+Stacks read foundation values through `terraform_remote_state`, from the foundation outputs in the same state bucket.
+The outputs are the contract between the layers, and no value is copied by hand.
+
+The Google Cloud project and its billing link are prerequisites, not managed by the foundation.
+Creating projects requires organization or billing permissions that vary from one account to another, like the account itself.
 
 ## Consequences
 

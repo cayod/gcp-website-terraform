@@ -12,7 +12,7 @@ Different actors need different permissions: planning, applying, and running wor
 
 | Identity | Roles | Scope |
 |---|---|---|
-| Plan service account (pull requests) | `roles/viewer`, `roles/storage.objectViewer` | Project, and the state bucket |
+| Plan service account (pull requests) | `roles/viewer`, `roles/iam.securityReviewer`, `roles/storage.objectViewer` | Project; `securityReviewer` lets plans read IAM policies, `objectViewer` lets them read state and site objects |
 | Apply service account (main and approved deploys) | `roles/compute.instanceAdmin.v1`, `roles/compute.loadBalancerAdmin`, `roles/compute.networkUser`, `roles/storage.admin`, `roles/iam.serviceAccountUser` | Project, except `serviceAccountUser`, which is granted only on the VM service account |
 | VM service account | `roles/logging.logWriter`, `roles/monitoring.metricWriter`, `roles/artifactregistry.reader` | Project for logging and monitoring, the remote repository only for Artifact Registry |
 
