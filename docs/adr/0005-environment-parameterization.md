@@ -28,7 +28,8 @@ Planned differences between environments:
 |---|---|---|
 | `region` | us-central1 | us-central1 |
 | `machine_type` | e2-micro | e2-micro |
-| `instance_count` | 1 (zonal) | 2 (regional, high availability) |
+| `zones` | us-central1-a | us-central1-a, us-central1-b (high availability) |
+| `instance_count` | 1 | 2 |
 | `domain` | derived `<ip>.sslip.io` | derived `<ip>.sslip.io` |
 | `budget_amount` | 50 | 100 |
 
