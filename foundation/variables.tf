@@ -54,6 +54,16 @@ variable "github_repository_id" {
   }
 }
 
+variable "github_owner_id" {
+  description = "Numeric ID of the GitHub repository owner, part of the immutable OIDC subject claim."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_owner_id))
+    error_message = "github_owner_id must be numeric."
+  }
+}
+
 variable "billing_account" {
   description = "Billing account ID used for the budget alert. Leave null to skip the budget."
   type        = string
