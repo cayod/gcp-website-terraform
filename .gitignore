@@ -1,0 +1,28 @@
+# Terraform working directories and state
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+
+# Local overrides, including the temporary local backend used during bootstrap
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Local variable files; the committed ones live in envs/
+*.auto.tfvars
+*.auto.tfvars.json
+local.tfvars
+
+# Credentials: no JSON file is expected in this repository
+*.json
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
