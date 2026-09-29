@@ -18,9 +18,11 @@ Different actors need different permissions: planning, applying, and running wor
 
 Workload Identity Federation bindings:
 
-- The provider accepts only tokens where `repository` matches this repository.
-- The plan identity is bound to pull request tokens of this repository.
-- The apply identity of each environment is bound to `repo:<owner>/<repo>:environment:<env>`.
+- The provider accepts only tokens whose `repository_id` matches this repository.
+- Bindings use GitHub immutable subject claims, which embed numeric IDs: `repo:<owner>@<owner_id>/<repo>@<repository_id>:<context>`.
+  A repository deleted and recreated under the same name gets a new ID and no access.
+- The plan identity is bound to the `pull_request` context of this repository.
+- The apply identity of each environment is bound to the `environment:<env>` context.
 
 Plans run with `-lock=false` so the plan identity needs no write access to the state bucket.
 
