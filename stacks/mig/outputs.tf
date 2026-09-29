@@ -8,6 +8,11 @@ output "ip_address" {
   value       = module.load_balancer.ip_address
 }
 
+output "content_sha256" {
+  description = "SHA-256 of the rendered page; the smoke test compares it with the page actually served."
+  value       = sha256(local.html)
+}
+
 output "certificate_name" {
   description = "Managed certificate, to check its provisioning status."
   value       = module.load_balancer.certificate_name

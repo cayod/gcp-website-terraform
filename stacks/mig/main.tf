@@ -10,6 +10,11 @@ locals {
   # Naming convention of the foundation layer: one state bucket per project.
   foundation_state_bucket = "${var.project_id}-tfstate"
   foundation              = data.terraform_remote_state.foundation.outputs
+
+  html = templatefile("${path.module}/../../site/index.html", {
+    environment = var.environment
+    approach    = "Managed Instance Group"
+  })
 }
 
 data "terraform_remote_state" "foundation" {
@@ -34,10 +39,7 @@ module "site" {
   port                  = local.foundation.web_port
   service_account_email = local.foundation.web_vm_service_account_email
   container_image       = "${local.foundation.docker_hub_mirror}/${var.web_server_image}"
-  html = templatefile("${path.module}/../../site/index.html", {
-    environment = var.environment
-    approach    = "Managed Instance Group"
-  })
+  html                  = local.html
 }
 
 module "load_balancer" {

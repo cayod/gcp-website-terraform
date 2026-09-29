@@ -82,8 +82,8 @@ destroy: init ## Destroy STACK for ENV
 output: init ## Show the outputs of STACK for ENV
 	$(TF) output
 
-smoke-test: init ## Check that the site of STACK in ENV serves its page over HTTPS
-	scripts/smoke-test.sh "$$($(TF) output -raw url)" "<dd>$(ENV)</dd>"
+smoke-test: init ## Check that the site of STACK in ENV serves exactly the deployed page over HTTPS
+	scripts/smoke-test.sh "$$($(TF) output -raw url)" "$$($(TF) output -raw content_sha256)"
 
 fmt: ## Format all Terraform files
 	terraform fmt -recursive
