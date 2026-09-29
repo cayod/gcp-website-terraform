@@ -64,6 +64,12 @@ variable "github_owner_id" {
   }
 }
 
+variable "state_bucket_force_destroy" {
+  description = "Allow the state bucket to be deleted with its content. Only set by make teardown."
+  type        = bool
+  default     = false
+}
+
 variable "billing_account" {
   description = "Billing account ID used for the budget alert. Leave null to skip the budget."
   type        = string
