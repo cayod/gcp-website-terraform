@@ -26,12 +26,19 @@ Planned differences between environments:
 
 | Variable | dev | prod |
 |---|---|---|
-| `region` | us-central1 | southamerica-east1 |
+| `region` | us-central1 | us-central1 |
 | `machine_type` | e2-micro | e2-micro |
 | `instance_count` | 1 (zonal) | 2 (regional, high availability) |
 | `domain` | derived `<ip>.sslip.io` | derived `<ip>.sslip.io` |
+| `budget_amount` | 50 | 100 |
 
 All variables are typed and validated.
+
+Both environments use the same region on purpose.
+Parity between `dev` and `prod` means that what is validated in `dev` behaves the same in `prod`:
+machine type availability, quotas, and prices are regional, and a region-specific issue would otherwise reach `prod` untested.
+The region remains a parameter; a different region is justified only when environments serve users in different geographies.
+`us-central1` also qualifies for the Compute Engine free tier.
 
 ## Consequences
 

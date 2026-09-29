@@ -1,3 +1,3 @@
 project_id  = "infra-tech-test"
-region      = "southamerica-east1"
+region      = "us-central1"
 environment = "prod"
