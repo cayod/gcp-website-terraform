@@ -6,8 +6,8 @@
 ## Context
 
 The DNS name or IP address must stay the same after a redeployment.
-TLS is optional but recommended.
-No registered domain or Cloud DNS zone is available for this project.
+Traffic must be encrypted with a certificate that browsers trust.
+The site must be reachable over TLS without depending on a registered domain.
 
 ## Decision
 
@@ -22,12 +22,12 @@ No registered domain or Cloud DNS zone is available for this project.
 
 - IP and hostname are stable by construction.
 - TLS works without buying a domain.
-- Certificate provisioning takes 15 to 60 minutes after the first apply; HTTP answers meanwhile.
-- The public sslip.io resolver is an external dependency, acceptable for a demonstration and replaceable through `domain`.
+- A new certificate takes 10 to 20 minutes to become active, and up to 60 in the worst case; HTTP answers with a redirect meanwhile.
+- The public sslip.io resolver is an external dependency, replaceable at any time through `domain`.
 - A reserved but unused IP costs about USD 7 per month if a stack is destroyed while the foundation remains.
 
 ## Alternatives considered
 
 - IP reserved inside each stack: a destroy, recreate, or resource rename changes the endpoint.
-- Registering a domain with Cloud DNS: the most production-like option, but outside the budget and scope; supported through the `domain` variable.
+- Registering a domain with Cloud DNS: the most production-like option, and a one-variable change through `domain` once a domain exists.
 - Self-signed certificate: browsers reject it, which defeats the purpose.

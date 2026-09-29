@@ -5,7 +5,7 @@
 
 ## Context
 
-This project must explain the reasons behind its architecture, not only the result.
+The reasons behind an architecture matter as much as the result.
 Decisions made during design are easily lost once the code exists.
 
 ## Decision
@@ -15,6 +15,6 @@ Each record is numbered, immutable once accepted, and superseded by a new record
 
 ## Consequences
 
-- Reviewers can follow the reasoning behind each choice without reading the code.
+- Readers can follow the reasoning behind each choice without reading the code.
 - The README stays short and links to the ADRs for detail.
 - Changing a decision requires a new record, which keeps the history of reasoning intact.

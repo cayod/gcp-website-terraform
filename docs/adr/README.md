@@ -14,4 +14,4 @@ Each record follows a lightweight format: context, decision, consequences, and a
 | [0007](0007-stable-endpoint-and-tls.md) | Stable endpoint and TLS | Accepted |
 | [0008](0008-ci-github-actions-wif.md) | CI/CD with GitHub Actions and Workload Identity Federation | Accepted |
 | [0009](0009-least-privilege-iam.md) | Least-privilege IAM model | Accepted |
-| [0010](0010-provider-usage.md) | Usage of the google and google-beta providers | Proposed |
+| [0010](0010-provider-usage.md) | Usage of the google and google-beta providers | Accepted |

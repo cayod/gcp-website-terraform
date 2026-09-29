@@ -20,7 +20,7 @@ With two stacks and two environments there are four combinations of backend and 
 - A `Makefile` is the single entry point: `make plan ENV=dev STACK=mig` and `make apply ENV=prod STACK=gcs`.
   It validates `ENV` and `STACK` and derives the backend prefix.
 - CI calls the same Makefile targets, so documented commands and pipeline commands are identical.
-- Reviewers deploy into their own projects by editing the project IDs in `envs/<env>/common.tfvars` and the bucket in `backend.gcs.tfbackend`.
+- Deploying into other projects only requires editing the project IDs in `envs/<env>/common.tfvars` and the bucket in `backend.gcs.tfbackend`.
 
 Planned differences between environments:
 
