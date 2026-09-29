@@ -17,14 +17,17 @@ Using beta resources without a reason adds instability.
 
 ## Outcome of the implementation
 
-Every resource of this design is generally available in `google` 8.x:
-load balancing, managed certificates, SSL policies, Cloud CDN, managed instance groups, Artifact Registry remote repositories, Workload Identity Federation, and billing budgets.
-No resource currently uses `google-beta`.
+The candidates were found by comparing the schemas of both providers at the pinned version, for the resources this design uses.
 
-Forcing a beta resource only to use the provider would trade stability for appearance.
-The provider stays configured, so a beta-only feature can be adopted with a one-line `provider` argument, for example Cloud Armor features that are still in preview.
+`google-beta` is used for the regional managed instance group, for `update_policy.min_ready_sec`.
+During a rolling update, the MIG retires an old instance as soon as its replacement passes the autohealing health check, while the load balancer routes to the new instance only after its own probes succeed `healthy_threshold` times.
+`min_ready_sec` makes the rollout wait longer than that, so no zone is left without an instance the load balancer can use.
+The value is derived from the health check settings, and a module test enforces the relation.
+
+Every other resource is generally available in `google` 8.x and stays on the stable provider.
+The other beta-only fields of these resources, such as request mirroring, circuit breakers, and graceful shutdown, bring no value to a static site.
 
 ## Consequences
 
-- Production resources run on the stable API surface only.
-- The beta provider is ready for use without further setup.
+- Beta usage is limited to one resource and one field, with the reason written next to it.
+- When `min_ready_sec` reaches general availability, the resource moves back to `google` by removing its `provider` argument.

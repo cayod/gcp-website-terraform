@@ -46,6 +46,7 @@ This shows compute-based hosting, where the machine type, the instance count, an
 VMs run Container-Optimized OS with an unprivileged nginx container pinned by digest, on a read-only filesystem without Linux capabilities.
 They have no external IP, no NAT, and no SSH, and they pull the image from an Artifact Registry mirror of Docker Hub through Private Google Access.
 The HTML is part of the instance template, so a change creates a new template, and the MIG replaces instances with a surge-first rolling update without downtime.
+The rollout retires an old instance only after the load balancer routes to its replacement.
 Terraform returns only when every instance runs the new template.
 
 ### Comparison
@@ -78,7 +79,7 @@ Details: [ADR 0002](docs/adr/0002-hosting-approaches.md) and [ADR 0006](docs/adr
 
 | Property | Implementation |
 |---|---|
-| Everything as code, `google` and `google-beta` | Everything is Terraform, including APIs, identities, and the state bucket. Both providers are declared and configured in every root module ([ADR 0010](docs/adr/0010-provider-usage.md)). |
+| Everything as code, `google` and `google-beta` | Everything is Terraform, including APIs, identities, and the state bucket. `google-beta` manages the instance group, for a rollout setting only available in the beta API ([ADR 0010](docs/adr/0010-provider-usage.md)). |
 | Remote state | One Cloud Storage bucket per project, with versioning and soft delete ([ADR 0004](docs/adr/0004-remote-state-per-project.md)). |
 | Continuous delivery | A merged change to `site/**` is applied by CI to both stacks, `dev` first and then `prod`; the object or the instance template changes with the HTML. |
 | Stable endpoint | IPs are reserved in the foundation layer, so they survive redeployments and even a destroy of a stack ([ADR 0007](docs/adr/0007-stable-endpoint-and-tls.md)). |

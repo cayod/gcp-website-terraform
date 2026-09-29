@@ -17,6 +17,7 @@ Internet egress for private VMs requires Cloud NAT, and public IPs on VMs increa
 - VMs have no external IP, no Cloud NAT, and no SSH access.
 - The HTML is delivered through cloud-init metadata in the instance template.
 - The instance template uses `name_prefix` with `create_before_destroy`, and the MIG uses a proactive rolling update policy.
+- The rollout waits for the load balancer to route to a new instance before retiring an old one (`min_ready_sec`, see [ADR 0010](0010-provider-usage.md)).
 - A dedicated service account runs the VMs, never the Compute Engine default service account.
 - Firewall rules only allow load balancer health check ranges (`35.191.0.0/16`, `130.211.0.0/22`) on the serving port.
 
