@@ -1,0 +1,30 @@
+#cloud-config
+# Container-Optimized OS: the web server runs as a hardened container managed by systemd.
+write_files:
+  - path: /var/lib/site/index.html
+    permissions: "0644"
+    encoding: b64
+    content: ${html_base64}
+  - path: /etc/systemd/system/site.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Static site served by nginx
+      Wants=network-online.target
+      After=network-online.target docker.service
+
+      [Service]
+      Environment="HOME=/home/cloudservice"
+      ExecStartPre=/usr/bin/docker-credential-gcr configure-docker --registries ${registry_host}
+      ExecStart=/usr/bin/docker run --rm --name site \
+        --read-only --tmpfs /tmp \
+        --cap-drop ALL --security-opt no-new-privileges \
+        -p ${port}:${container_port} \
+        -v /var/lib/site:/usr/share/nginx/html:ro \
+        ${container_image}
+      ExecStop=/usr/bin/docker stop site
+      Restart=always
+
+runcmd:
+  - systemctl daemon-reload
+  - systemctl start site.service
