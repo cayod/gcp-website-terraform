@@ -23,8 +23,9 @@ TF_ROOTS        = foundation $(wildcard stacks/*)
 TF_TESTED_DIRS  = $(patsubst %/tests/,%,$(dir $(wildcard modules/*/tests/)))
 
 BOOTSTRAP_OVERRIDE = foundation/bootstrap_override.tf
+APP_STACKS         = $(filter-out foundation,$(STACKS))
 
-.PHONY: help check-args bootstrap init plan apply destroy output smoke-test fmt fmt-check validate test
+.PHONY: help check-args bootstrap teardown init plan apply destroy output smoke-test fmt fmt-check validate test
 
 help: ## Show available targets
 	@echo "Usage: make <target> ENV=<$(subst $(space),|,$(ENVS))> STACK=<$(subst $(space),|,$(STACKS))>"
@@ -46,6 +47,23 @@ bootstrap: check-args ## Create the foundation of ENV with local state, then mig
 		-backend-config=$(BACKEND_CONFIG) \
 		-backend-config="prefix=$(ROOT_DIR)"
 	rm -f $(ROOT_DIR)/terraform.tfstate $(ROOT_DIR)/terraform.tfstate.backup
+
+# Mirror of bootstrap. The state bucket belongs to the foundation, so the state moves back to a
+# local backend first, and the bucket may only be deleted with its content during a teardown.
+teardown: STACK = foundation
+teardown: check-args ## Destroy the foundation of ENV, after its stacks, moving its state back to local
+	@set -e; for stack in $(APP_STACKS); do \
+		$(MAKE) --no-print-directory init ENV=$(ENV) STACK=$$stack >/dev/null; \
+		if [ -n "$$(terraform -chdir=stacks/$$stack state list)" ]; then \
+			echo "Stack $$stack still has resources in $(ENV): run make destroy ENV=$(ENV) STACK=$$stack first" >&2; exit 1; \
+		fi; \
+	done
+	$(MAKE) --no-print-directory init ENV=$(ENV) STACK=foundation
+	printf 'terraform {\n  backend "local" {}\n}\n' > $(BOOTSTRAP_OVERRIDE)
+	$(TF) init -migrate-state -force-copy -input=false
+	$(TF) apply -input=false $(VAR_FILES) -var=state_bucket_force_destroy=true -target=google_storage_bucket.tfstate $(APPLY_ARGS)
+	$(TF) destroy -input=false $(VAR_FILES) -var=state_bucket_force_destroy=true $(APPLY_ARGS)
+	rm -f $(BOOTSTRAP_OVERRIDE) $(ROOT_DIR)/terraform.tfstate $(ROOT_DIR)/terraform.tfstate.backup
 
 init: check-args ## Initialize the backend of STACK for ENV
 	$(TF) init -reconfigure -input=false \

@@ -21,6 +21,15 @@ Bootstrap sequence:
 2. Run `terraform init -migrate-state` to move the foundation state into the bucket it created.
 3. Delete the local state file.
 
+Teardown sequence, the mirror of the bootstrap (`make teardown`):
+
+1. Refuse to run while any stack of the environment still has resources.
+2. Move the foundation state back to a local backend.
+3. Allow the state bucket to be deleted with its content, through a variable that only the teardown sets.
+4. Destroy the foundation and delete the local state file.
+
+The state bucket is never deletable with its content outside a teardown, so a mistaken destroy cannot erase the state.
+
 ## Consequences
 
 - Credentials for `dev` cannot read or corrupt the `prod` state.
