@@ -1,4 +1,6 @@
 # Terraform working directories and state
+# Provider versions are locked by root modules only; child modules inherit them.
+modules/**/.terraform.lock.hcl
 **/.terraform/*
 *.tfstate
 *.tfstate.*
