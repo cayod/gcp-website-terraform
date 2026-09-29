@@ -22,6 +22,12 @@ locals {
 
   # Time for a new instance to boot, pull the image, and pass its first health checks.
   autohealing_initial_delay_seconds = 180
+
+  # The load balancer probes instances on its own and routes to a new one only after
+  # healthy_threshold consecutive successes; the margin covers probe jitter.
+  load_balancer_ready_seconds = local.health_check.healthy_threshold * local.health_check.interval_seconds
+  rollout_margin_seconds      = 10
+  rollout_min_ready_seconds   = local.load_balancer_ready_seconds + local.rollout_margin_seconds
 }
 
 resource "google_compute_instance_template" "this" {
@@ -79,7 +85,10 @@ resource "google_compute_health_check" "this" {
   }
 }
 
+# google-beta: update_policy.min_ready_sec is only available in the beta API.
 resource "google_compute_region_instance_group_manager" "this" {
+  provider = google-beta
+
   name                      = var.name
   region                    = var.region
   base_instance_name        = var.name
@@ -100,13 +109,15 @@ resource "google_compute_region_instance_group_manager" "this" {
     initial_delay_sec = local.autohealing_initial_delay_seconds
   }
 
-  # Surge one instance per zone and never take one away before its replacement is ready.
+  # Surge one instance per zone and never take one away before the load balancer routes to
+  # its replacement: an instance healthy for the MIG is not yet healthy for the load balancer.
   update_policy {
     type                  = "PROACTIVE"
     minimal_action        = "REPLACE"
     replacement_method    = "SUBSTITUTE"
     max_surge_fixed       = length(var.zones)
     max_unavailable_fixed = 0
+    min_ready_sec         = local.rollout_min_ready_seconds
   }
 
   # Apply returns only when every instance runs the new template, so CI smoke tests see the new page.
