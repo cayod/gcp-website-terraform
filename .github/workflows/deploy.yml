@@ -1,0 +1,35 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "modules/**"
+      - "stacks/**"
+      - "envs/**"
+      - "scripts/**"
+      - ".github/workflows/deploy.yml"
+      - ".github/workflows/apply.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  dev:
+    uses: ./.github/workflows/apply.yml
+    with:
+      environment: dev
+      project_id: ${{ vars.DEV_PROJECT_ID }}
+      workload_identity_provider: ${{ vars.DEV_WORKLOAD_IDENTITY_PROVIDER }}
+
+  # Promotes the exact commit validated in dev; the prod GitHub Environment requires approval.
+  prod:
+    needs: dev
+    uses: ./.github/workflows/apply.yml
+    with:
+      environment: prod
+      project_id: ${{ vars.PROD_PROJECT_ID }}
+      workload_identity_provider: ${{ vars.PROD_WORKLOAD_IDENTITY_PROVIDER }}
