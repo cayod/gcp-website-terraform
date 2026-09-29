@@ -22,7 +22,9 @@ TF              = terraform -chdir=$(ROOT_DIR)
 TF_ROOTS        = foundation $(wildcard stacks/*)
 TF_TESTED_DIRS  = $(patsubst %/tests/,%,$(dir $(wildcard modules/*/tests/)))
 
-.PHONY: help check-args init plan apply destroy output fmt fmt-check validate test
+BOOTSTRAP_OVERRIDE = foundation/bootstrap_override.tf
+
+.PHONY: help check-args bootstrap init plan apply destroy output fmt fmt-check validate test
 
 help: ## Show available targets
 	@echo "Usage: make <target> ENV=<$(subst $(space),|,$(ENVS))> STACK=<$(subst $(space),|,$(STACKS))>"
@@ -31,6 +33,19 @@ help: ## Show available targets
 check-args:
 	@case "$(ENV)" in $(subst $(space),|,$(ENVS))) ;; *) echo "ENV must be one of: $(ENVS)" >&2; exit 1;; esac
 	@case "$(STACK)" in $(subst $(space),|,$(STACKS))) ;; *) echo "STACK must be one of: $(STACKS)" >&2; exit 1;; esac
+
+# The state bucket does not exist before the foundation creates it, so the first apply
+# uses a temporary local backend and then migrates the state into the new bucket.
+bootstrap: STACK = foundation
+bootstrap: check-args ## Create the foundation of ENV with local state, then migrate it to the bucket
+	printf 'terraform {\n  backend "local" {}\n}\n' > $(BOOTSTRAP_OVERRIDE)
+	$(TF) init -reconfigure -input=false
+	$(TF) apply -input=false $(VAR_FILES) $(APPLY_ARGS)
+	rm $(BOOTSTRAP_OVERRIDE)
+	$(TF) init -migrate-state -force-copy -input=false \
+		-backend-config=$(BACKEND_CONFIG) \
+		-backend-config="prefix=$(ROOT_DIR)"
+	rm -f $(ROOT_DIR)/terraform.tfstate $(ROOT_DIR)/terraform.tfstate.backup
 
 init: check-args ## Initialize the backend of STACK for ENV
 	$(TF) init -reconfigure -input=false \
