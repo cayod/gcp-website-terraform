@@ -189,14 +189,16 @@ Run `make help` for every target.
 
 ### 4. Destroy
 
+Stacks first, then the foundation, for each environment:
+
 ```sh
 make destroy ENV=dev STACK=gcs
 make destroy ENV=dev STACK=mig
+make teardown ENV=dev
 ```
 
-The foundation stores its own state in the bucket it manages.
-To remove it, move its state back to a local backend first, then destroy it.
-A deleted Workload Identity pool keeps its ID reserved for 30 days.
+`make teardown` mirrors the bootstrap: it refuses to run while a stack still has resources, moves the foundation state back to a local backend, and only then allows the state bucket to be deleted with its content.
+A deleted Workload Identity pool keeps its ID reserved for 30 days, so bootstrapping the same project again within that period requires restoring the pool with `gcloud iam workload-identity-pools undelete`.
 
 ## CI/CD
 
