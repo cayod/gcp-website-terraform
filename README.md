@@ -81,7 +81,7 @@ Details: [ADR 0002](docs/adr/0002-hosting-approaches.md) and [ADR 0006](docs/adr
 |---|---|
 | Everything as code, `google` and `google-beta` | Everything is Terraform, including APIs, identities, and the state bucket. `google-beta` manages the instance group, for a rollout setting only available in the beta API ([ADR 0010](docs/adr/0010-provider-usage.md)). |
 | Remote state | One Cloud Storage bucket per project, with versioning and soft delete ([ADR 0004](docs/adr/0004-remote-state-per-project.md)). |
-| Continuous delivery | A merged change to `site/**` is applied by CI to both stacks, `dev` first and then `prod`; the object or the instance template changes with the HTML. |
+| Continuous delivery | A merged change to `site/**` is applied by CI to both stacks, `dev` first and then `prod`; the object or the instance template changes with the HTML, and the smoke test verifies that the served page matches the commit byte for byte. |
 | Stable endpoint | IPs are reserved in the foundation layer, so they survive redeployments and even a destroy of a stack ([ADR 0007](docs/adr/0007-stable-endpoint-and-tls.md)). |
 | TLS | Google-managed certificates for `<ip>.sslip.io`, or for any domain given in `domain`. |
 | Isolated environments with their own parameters | `envs/dev` and `envs/prod` set the project, zones, instance count, and budget ([ADR 0005](docs/adr/0005-environment-parameterization.md)). |
@@ -211,6 +211,8 @@ merge to main ─> apply dev (gcs, mig) ─> smoke test
 ```
 
 `prod` always receives the exact commit that was validated in `dev`, through the same reusable workflow.
+The smoke test proves the delivery end to end: it compares the SHA-256 of the page actually served with the hash of the page rendered from the commit, and checks the HTTP to HTTPS redirect.
+A deployment that leaves any stale page behind fails.
 To roll back, revert the change and merge: the pipeline is the same.
 
 ## Trade-offs and next steps

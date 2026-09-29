@@ -24,6 +24,7 @@ No service account key exists anywhere.
 `deploy.yml` runs on pushes to `main` that touch `site/**`, `modules/**`, `stacks/**`, `envs/**`, or `scripts/**`:
 
 1. Apply both stacks to `dev`, then run a smoke test.
+   The smoke test compares the SHA-256 of the page actually served with the hash of the page rendered from the commit, so a deployment that leaves a stale page behind fails.
 2. Apply both stacks to `prod` through the `prod` GitHub Environment, which requires manual approval, then run a smoke test.
 3. Both stages call the same reusable workflow, `apply.yml`, so `dev` and `prod` run identical steps.
 4. A concurrency group per environment and stack prevents parallel applies.
