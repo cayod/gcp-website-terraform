@@ -6,9 +6,10 @@ set -euo pipefail
 readonly url="${1:?usage: smoke-test.sh <https-url> <expected-text>}"
 readonly expected_text="${2:?usage: smoke-test.sh <https-url> <expected-text>}"
 
-# A new load balancer or certificate can take several minutes to answer at the edge.
-readonly retry_attempts=20
-readonly retry_delay_seconds=15
+# On a first deployment, a new load balancer takes minutes to answer at the edge and a new
+# managed certificate up to 20 minutes to become active. Later deployments answer at once.
+readonly retry_attempts=40
+readonly retry_delay_seconds=30
 readonly permanent_redirect_status=301
 
 body="$(curl --fail --silent --show-error \
