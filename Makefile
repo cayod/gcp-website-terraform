@@ -24,7 +24,7 @@ TF_TESTED_DIRS  = $(patsubst %/tests/,%,$(dir $(wildcard modules/*/tests/)))
 
 BOOTSTRAP_OVERRIDE = foundation/bootstrap_override.tf
 
-.PHONY: help check-args bootstrap init plan apply destroy output fmt fmt-check validate test
+.PHONY: help check-args bootstrap init plan apply destroy output smoke-test fmt fmt-check validate test
 
 help: ## Show available targets
 	@echo "Usage: make <target> ENV=<$(subst $(space),|,$(ENVS))> STACK=<$(subst $(space),|,$(STACKS))>"
@@ -63,6 +63,9 @@ destroy: init ## Destroy STACK for ENV
 
 output: init ## Show the outputs of STACK for ENV
 	$(TF) output
+
+smoke-test: init ## Check that the site of STACK in ENV serves its page over HTTPS
+	scripts/smoke-test.sh "$$($(TF) output -raw url)" "<dd>$(ENV)</dd>"
 
 fmt: ## Format all Terraform files
 	terraform fmt -recursive
