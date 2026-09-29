@@ -1,4 +1,5 @@
 mock_provider "google" {}
+mock_provider "google-beta" {}
 
 variables {
   name                  = "site-test"
@@ -80,6 +81,17 @@ run "rolling_update_keeps_the_site_available" {
   assert {
     condition     = google_compute_region_instance_group_manager.this.update_policy[0].max_unavailable_fixed == 0 && google_compute_region_instance_group_manager.this.update_policy[0].max_surge_fixed == length(var.zones)
     error_message = "New instances must be created before old ones are removed."
+  }
+}
+
+run "rolling_update_waits_for_the_load_balancer" {
+  command = plan
+
+  assert {
+    condition = google_compute_region_instance_group_manager.this.update_policy[0].min_ready_sec > (
+      google_compute_health_check.this.healthy_threshold * google_compute_health_check.this.check_interval_sec
+    )
+    error_message = "A new instance must stay ready longer than the load balancer needs to mark it healthy before an old one is removed."
   }
 }
 
