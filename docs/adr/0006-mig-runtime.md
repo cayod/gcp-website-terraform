@@ -33,4 +33,4 @@ Internet egress for private VMs requires Cloud NAT, and public IPs on VMs increa
 
 - Debian with `apt install nginx` and Cloud NAT: fragile boot, version drift, and unnecessary egress.
 - VMs with public IPs: attack surface with no benefit, since the load balancer is the only entry point.
-- Custom image built with Packer: most immutable, but adds a build pipeline that exceeds the scope.
+- Custom image built with Packer: most immutable, but adds an image build pipeline that a static site does not need.

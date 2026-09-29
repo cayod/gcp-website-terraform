@@ -5,7 +5,7 @@
 
 ## Context
 
-The challenge requires the `google` and `google-beta` providers.
+Some Google Cloud features ship first in the `google-beta` provider, so both providers are part of this design.
 Most resources needed here are generally available in the `google` provider.
 Using beta resources without a reason adds instability.
 

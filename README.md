@@ -1,6 +1,8 @@
 # Website Hosting on Google Cloud with Terraform
 
-A static website served on Google Cloud in two different ways, provisioned entirely with Terraform and deployed by GitHub Actions into two projects, `dev` and `prod`.
+Two ways to host a website on Google Cloud, defined entirely with Terraform and delivered through CI/CD.
+Every change goes through a pull request: GitHub Actions validates and plans it, deploys it to `dev`, and promotes the same commit to `prod` after approval.
+Each environment lives in its own Google Cloud project.
 
 | Environment | Cloud Storage + Cloud CDN | Managed Instance Group |
 |---|---|---|
@@ -64,7 +66,7 @@ For a static site, approach A is the one to run in production.
 | Option | Reason |
 |---|---|
 | Cloud Run | A strong production choice, but it needs an image build pipeline to serve one HTML file. It is the natural next step if the site becomes dynamic. |
-| Firebase Hosting | Hides the infrastructure this challenge is about, and its Terraform support is partial and beta-only. |
+| Firebase Hosting | Hides the underlying infrastructure, and its Terraform support is partial and beta-only. |
 | App Engine | One application per project, a region that cannot change, and little new investment in the platform. |
 | GKE | Cost and operational overhead out of proportion for static content. |
 | Cloud Functions | Built for event-driven code, not for serving static content. |
@@ -72,17 +74,17 @@ For a static site, approach A is the one to run in production.
 
 Details: [ADR 0002](docs/adr/0002-hosting-approaches.md) and [ADR 0006](docs/adr/0006-mig-runtime.md).
 
-## How the requirements are met
+## Design properties
 
-| Requirement | Implementation |
+| Property | Implementation |
 |---|---|
-| Terraform only, `google` and `google-beta` | Everything is Terraform, including APIs, identities, and the state bucket. Both providers are declared and configured in every root module ([ADR 0010](docs/adr/0010-provider-usage.md)). |
+| Everything as code, `google` and `google-beta` | Everything is Terraform, including APIs, identities, and the state bucket. Both providers are declared and configured in every root module ([ADR 0010](docs/adr/0010-provider-usage.md)). |
 | Remote state | One Cloud Storage bucket per project, with versioning and soft delete ([ADR 0004](docs/adr/0004-remote-state-per-project.md)). |
-| Redeployment on HTML change | A push to `main` that touches `site/**` applies both stacks; the object or the instance template changes with the HTML. |
+| Continuous delivery | A merged change to `site/**` is applied by CI to both stacks, `dev` first and then `prod`; the object or the instance template changes with the HTML. |
 | Stable endpoint | IPs are reserved in the foundation layer, so they survive redeployments and even a destroy of a stack ([ADR 0007](docs/adr/0007-stable-endpoint-and-tls.md)). |
 | TLS | Google-managed certificates for `<ip>.sslip.io`, or for any domain given in `domain`. |
-| Two projects with different parameters | `envs/dev` and `envs/prod` set the project, zones, instance count, and budget ([ADR 0005](docs/adr/0005-environment-parameterization.md)). |
-| CI | GitHub Actions with Workload Identity Federation and no keys ([ADR 0008](docs/adr/0008-ci-github-actions-wif.md)). |
+| Isolated environments with their own parameters | `envs/dev` and `envs/prod` set the project, zones, instance count, and budget ([ADR 0005](docs/adr/0005-environment-parameterization.md)). |
+| Keyless CI/CD | GitHub Actions with Workload Identity Federation and no service account keys ([ADR 0008](docs/adr/0008-ci-github-actions-wif.md)). |
 
 ## Repository layout
 
@@ -215,7 +217,3 @@ To roll back, revert the change and merge: the pipeline is the same.
 - **The foundation is applied by a human.** In a larger setup it would get its own pipeline, in an admin project, with a stricter approval.
 - **sslip.io instead of a real domain.** A registered domain with Cloud DNS is a one-variable change.
 - Not implemented to keep the cost low: Cloud Armor, customer-managed encryption keys, and uptime checks.
-
-## Time spent
-
-TBD

@@ -43,4 +43,4 @@ The foundation layer is never applied by CI.
 ## Alternatives considered
 
 - Cloud Build: equally valid, but GitHub Actions keeps code, review, and pipeline in one place.
-- Service account JSON keys stored as GitHub secrets: long-lived credentials that can leak, explicitly discouraged by the challenge.
+- Service account JSON keys stored as GitHub secrets: long-lived credentials that can leak, and discouraged by Google Cloud security guidance.

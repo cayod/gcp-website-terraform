@@ -5,7 +5,7 @@
 
 ## Context
 
-The challenge evaluates whether IAM grants are the minimum necessary.
+Each identity must hold only the permissions it needs.
 Different actors need different permissions: planning, applying, and running workloads.
 
 ## Decision
